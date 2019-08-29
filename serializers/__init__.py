@@ -1,0 +1,1 @@
+from notifications.serializers.notification import NotificationSerializer

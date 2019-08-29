@@ -1,0 +1,9 @@
+nomenclature:
+  name: notifications
+  verboseName: Notifications
+description: Notifications system
+isApi: true
+baseUrls:
+  http: notifications/
+  ws: notifications/
+  static: notifications/
