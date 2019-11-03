@@ -21,5 +21,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('subscription/', Subscription.as_view()),
     path('read/', MarkRead.as_view()),
-    path('register_token', FCMToken)
+    path('token/', FCMToken.as_view())
 ]

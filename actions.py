@@ -35,10 +35,15 @@ def push_notification(
     :return: Notification object
     """
 
+    try:
+        app_base_url = category.app_config.base_urls.http
+    except AttributeError:
+        app_base_url = ''
+
     notification = Notification(
         template=template,
         category=category,
-        web_onclick_url=web_onclick_url or category.app_config.base_urls.http,
+        web_onclick_url=web_onclick_url or app_base_url,
         android_onclick_activity=android_onclick_activity,
         ios_onclick_action=ios_onclick_action,
         is_personalised=is_personalised,
@@ -60,17 +65,14 @@ def push_notification(
         else:
             notification.save()
             all_endpoints = PushEndpoint.fetch(person)
-            print("notification.id", notification.id)
             UserNotification(
                 person_id=person,
                 notification_id=notification.id
             ).push()
-            endpoints = [item for sublist in all_endpoints for item in sublist]
-            if endpoints:
-                # res => True or False
-                res = fcm_push(
+            if all_endpoints:
+                _ = fcm_push(
                     notification_id=notification.id,
-                    tokens=endpoints,
+                    tokens=all_endpoints,
                 )
             return notification
 
@@ -82,7 +84,6 @@ def push_notification(
             )
         else:
             notification.save()
-            print("notification.id", notification.id)
             _ = execute_users_set_push(
                 notification_id=notification.id,
                 persons=persons
@@ -93,7 +94,6 @@ def push_notification(
         notification.save()
         res = execute_topic_push(notification)
         if not res:
-            print(res, "NOT NOTIFIED")
             notification.delete()
             pass  # TODO Log and raise error
 

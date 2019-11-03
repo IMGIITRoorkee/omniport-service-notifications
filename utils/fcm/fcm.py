@@ -1,6 +1,7 @@
-from urllib.parse import urljoin
+import os
 
 from firebase_admin import messaging
+from django.conf import settings
 
 from notifications.models import Notification
 
@@ -14,36 +15,36 @@ def fcm_push(notification_id, tokens=None):
     :return: None
     """
 
-    BASE_URL = ''
-
     try:
         notification = Notification.objects.get(id=notification_id)
         app_config = notification.category.app_config
 
-    except Notification.DoesNotExist as e:
-        # TODO Log
-        print(str(e))
+    except Notification.DoesNotExist:
         return False
-
-    print('fcm push')  # TODO remove print
 
     base_notification = messaging.Notification(
         title=notification.category.name,
         body=notification.template,
     )
     android_conf = messaging.AndroidConfig(
-            notification=messaging.AndroidNotification(
-                click_action=notification.android_onclick_activity
-            )
+        notification=messaging.AndroidNotification(
+            click_action=notification.android_onclick_activity
         )
+    )
     webpush_conf = messaging.WebpushConfig(
-            data=dict(
-                onlclick_url=notification.web_onclick_url
-            )
-        )
-    extra_data = dict(
-        app_icon_url=urljoin(
-            app_config.base_urls.static, app_config.assets.logo
+        notification=messaging.WebpushNotification(
+            icon=os.path.join(
+                settings.STATIC_URL,
+                app_config.base_urls.static,
+                'assets',
+                app_config.assets.logo,
+            ),
+            actions=[
+                messaging.WebpushNotificationAction(
+                    action=notification.web_onclick_url,
+                    title=f'Open {notification.web_onclick_url}'
+                )
+            ]
         )
     )
 
@@ -52,7 +53,6 @@ def fcm_push(notification_id, tokens=None):
     if tokens:
         message = messaging.MulticastMessage(
             notification=base_notification,
-            data=extra_data,
             android=android_conf,
             webpush=webpush_conf,
             tokens=tokens
@@ -60,7 +60,6 @@ def fcm_push(notification_id, tokens=None):
     else:
         message = messaging.Message(
             notification=base_notification,
-            data=extra_data,
             android=android_conf,
             webpush=webpush_conf,
             topic=notification.category.slug
