@@ -6,7 +6,7 @@ from categories.serializers import CategorySerializer
 
 class NotificationSerializer(ModelSerializer):
     """
-    TODO
+    Serializer for notification object
     """
     category = CategorySerializer(
         many=False,
@@ -15,7 +15,7 @@ class NotificationSerializer(ModelSerializer):
 
     class Meta:
         """
-        TODO
+        Meta class for NotificationSerializer
         """
         model = Notification
         fields = (
@@ -28,7 +28,8 @@ class NotificationSerializer(ModelSerializer):
 
     def to_representation(self, instance):
         """
-        TODO
+        Extend to_representation of model serializer to include data
+        from context
         :param instance:
         :return:
         """

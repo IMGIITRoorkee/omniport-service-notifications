@@ -19,7 +19,7 @@ from notifications.utils.fcm import (
 @receiver(post_save, sender=UserSubscription)
 def subscription_handler(sender, instance, **kwargs):
     """
-    TODO
+    Database signal receiver for subscription
     :param sender:
     :param instance:
     :param kwargs:
@@ -36,7 +36,7 @@ def subscription_handler(sender, instance, **kwargs):
 @receiver(pre_delete, sender=UserSubscription)
 def unsubscription_handler(sender, instance, **kwargs):
     """
-    TODO
+    Database signal receiver for unsubscription
     :param sender:
     :param instance:
     :param kwargs:

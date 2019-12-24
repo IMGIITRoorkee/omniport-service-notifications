@@ -54,7 +54,7 @@ class PushEndpoint:
     @classmethod
     def fetch(cls, person_id):
         """
-        TODO
+        Fetch the list of registered endpoints
         :param cls:
         :param person_id:
         :return: return an array of array of endpoints

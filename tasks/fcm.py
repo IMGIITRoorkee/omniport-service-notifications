@@ -7,9 +7,9 @@ from notifications.constants import FCM_PUSH_LIMIT
 
 def execute_topic_push(notification):
     """
-    TODO
+    Topic push notification trigger function
     :param notification: notification to send
-    :return: None
+    :return: success/failure
     """
 
     category = notification.category.slug
@@ -30,12 +30,11 @@ def execute_topic_push(notification):
 
 def execute_users_set_push(notification_id, persons):
     """
-    TODO
+    Mass push notification trigger function
     :param notification_id: Notification id
     :param persons: List of user ids
-    :return:
+    :return: success/failure
     """
-    # TODO
     # A list of endpoints, independent of type
     endpoints = list()
 
@@ -63,16 +62,16 @@ def _divide_chunks(endpoints):
 
 # Queue
 @celery_app.task(
-    queue='celery',
+    queue='celery-notifications',
     autoretry_for=(Exception,),
     retry_kwargs={'max_retries': 5}
 )
 def subset_push(notification_id, endpoints):
     """
-    TODO
+    Batchwise pushing notifications using message-broker
     :param notification_id: Notification id
     :param endpoints: List of endpoints less than push limit
-    :return:
+    :return: success/failure
     """
     return fcm_push(
         notification_id=notification_id,

@@ -68,18 +68,12 @@ def fcm_push(notification_id, tokens=None):
     try:
         # use dry_run = True for testing purpose
         if tokens:
-            response = messaging.send_multicast(message, dry_run=False)
+            _ = messaging.send_multicast(message, dry_run=False)
         else:
-            response = messaging.send(message, dry_run=False)
-        print('FCM response', response, type(response))
-        # TODO validate for response
+            _ = messaging.send(message, dry_run=False)
     except messaging.ApiCallError as e:
-        # TODO Log
-        print(1, e)
         return False
     except ValueError as e:
-        print(2, e)
-        # TODO Log
         return False
 
     return True
@@ -94,16 +88,10 @@ def fcm_subscribe(tokens, topic):
     """
 
     try:
-        response = messaging.subscribe_to_topic(tokens, topic)
-        print(response.success_count)
-        # TODO validate for response
+        _ = messaging.subscribe_to_topic(tokens, topic)
     except messaging.ApiCallError as e:
-        print(1, e)
-        # TODO Log
         return False
     except ValueError as e:
-        print(2, e, type(tokens))
-        # TODO Log
         return False
 
     return True
@@ -119,16 +107,10 @@ def fcm_unsubscribe(tokens, topic):
     """
 
     try:
-        response = messaging.unsubscribe_from_topic(tokens, topic)
-        print(response.success_count)
-        # TODO validate for response
+        _ = messaging.unsubscribe_from_topic(tokens, topic)
     except messaging.ApiCallError as e:
-        print(1, e)
-        # TODO Log
         return False
     except ValueError as e:
-        print(2, e)
-        # TODO Log
         return False
 
     return True

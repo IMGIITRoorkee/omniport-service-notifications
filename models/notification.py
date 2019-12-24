@@ -14,7 +14,7 @@ class Notification(Model):
     )
     category = models.ForeignKey(
         to='categories.Category',
-        on_delete=models.CASCADE  # TODO decide this
+        on_delete=models.CASCADE
     )
     web_onclick_url = models.URLField(
         max_length=200,
