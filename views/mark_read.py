@@ -8,21 +8,13 @@ from notifications.redisdb import UserNotification
 
 class MarkRead(APIView):
     """
-    TODO
+    Mark notification read for the user
     """
 
     permission_classes = [IsAuthenticated, ]
     http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
-        """
-        TODO
-        :param request:
-        :param args:
-        :param kwargs:
-        :return:
-        """
-
         try:
             notification_ids = request.data['ids']
         except KeyError:

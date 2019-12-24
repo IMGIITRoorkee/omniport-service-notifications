@@ -8,7 +8,7 @@ from notifications.redisdb import PushEndpoint
 
 class FCMToken(APIView):
     """
-    TODO
+    View to handle FCM client tokens
     """
 
     permission_classes = [IsAuthenticated, ]
@@ -16,9 +16,9 @@ class FCMToken(APIView):
 
     def post(self, request):
         """
-        TODO
-        :param request:
-        :return:
+        Add token to the user's FCM token list
+        :param request: API request
+        :return: API response
         """
 
         try:
@@ -46,9 +46,9 @@ class FCMToken(APIView):
 
     def delete(self, request):
         """
-
-        :param request:
-        :return:
+        Delete token from the user's FCM token list
+        :param request: API request
+        :return: API response
         """
         res = PushEndpoint.delete(
             person_id=request.person.id,

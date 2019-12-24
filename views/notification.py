@@ -24,8 +24,8 @@ class UserNotificationViewSet(ModelViewSet):
 
     def get_serializer_context(self):
         """
-        TODO
-        :return:
+        Pass context to the serializer
+        :return: the context data
         """
 
         person_id = self.request.person.id
@@ -38,7 +38,7 @@ class UserNotificationViewSet(ModelViewSet):
     def get_queryset(self):
         """
         Queryset for fetching user notifications
-        :return:
+        :return: the queryset of user notifications
         """
 
         person_id = self.request.person.id

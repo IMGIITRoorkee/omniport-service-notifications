@@ -9,14 +9,14 @@ from categories.serializers import SubscriptionTreeSerializer
 
 class Subscription(APIView):
     """
-    TODO
+    Handle notification subscription
     """
 
     permission_classes = [IsAuthenticated, ]
 
     def get(self, request, *args, **kwargs):
         """
-
+        Fetch notifications subscription tree of the user
         :param request:
         :param args:
         :param kwargs:
@@ -29,7 +29,7 @@ class Subscription(APIView):
 
     def post(self, request, *args, **kwargs):
         """
-
+        Update notifications subscription tree of the user
         :param request:
         :param args:
         :param kwargs:
