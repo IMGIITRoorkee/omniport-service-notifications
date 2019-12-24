@@ -1,3 +1,5 @@
+import logging
+
 from notifications.models import Notification
 from notifications.tasks import (
     execute_topic_push,
@@ -8,6 +10,8 @@ from notifications.redisdb import (
     PushEndpoint,
     UserNotification,
 )
+
+logger = logging.getLogger('notifications')
 
 
 def push_notification(
@@ -59,6 +63,10 @@ def push_notification(
 
     if is_personalised:
         if person is None:
+            logger.error(
+                f'Incorrect argument for notification #{notification.id}: '
+                '\'person\' cannot be None for a personalised notification'
+            )
             raise ValueError(
                 '\'person\' cannot be None for a personalised notification'
             )
@@ -74,10 +82,18 @@ def push_notification(
                     notification_id=notification.id,
                     tokens=all_endpoints,
                 )
+            logger.info(
+                f'Personal notification #{notification.id} successfully sent'
+            )
             return notification
 
     if has_custom_users_target:
         if persons is None:
+            logger.error(
+                'Incorrect argument for notification #{notification.id}: '
+                '\'persons\' cannot be None while \'has_custom_users_target\' '
+                'is True '
+            )
             raise ValueError(
                 '\'persons\' cannot be None while \'has_custom_users_target\' '
                 'is True '
@@ -88,13 +104,16 @@ def push_notification(
                 notification_id=notification.id,
                 persons=persons
             )
+            logger.info(
+                f'Mass notification #{notification.id} successfully sent'
+            )
             return notification
 
     if not (is_personalised and has_custom_users_target):
         notification.save()
-        res = execute_topic_push(notification)
-        if not res:
-            notification.delete()
-            pass  # TODO Log and raise error
+        _ = execute_topic_push(notification)
+        logger.info(
+            f'Topic notification #{notification.id} successfully sent'
+        )
 
     return notification
