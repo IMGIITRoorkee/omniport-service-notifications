@@ -1,11 +1,11 @@
 import datetime
 
 from django.db.models import Q
+from django.conf import settings
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
 from discovery.available import available_apps
-from omniport.settings import DISCOVERY
 from notifications.models import Notification
 from notifications.serializers import NotificationSerializer
 from notifications.constants import NOTIFICATION_AGE_LIMIT
@@ -48,7 +48,8 @@ class UserNotificationViewSet(ModelViewSet):
         )
 
         specific_app = self.request.query_params.get('app', False)
-        available_services = set(service for service, _ in DISCOVERY.services)
+        available_services = set(
+            service for service, _ in settings.DISCOVERY.services)
         available = set(app for app, _ in available_apps(
             request=self.request,
         )) | available_services
