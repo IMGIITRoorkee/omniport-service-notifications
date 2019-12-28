@@ -42,7 +42,6 @@ class Notification(Model):
     )
 
     class Meta:
-        unique_together = ('template', 'category')
         ordering = ['-datetime_modified']
 
     def __str__(self):
