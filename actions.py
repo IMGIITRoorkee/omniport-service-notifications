@@ -77,10 +77,10 @@ def push_notification(
             return notification
 
     if has_custom_users_target:
-        if persons is None:
+        if not persons:
             raise ValueError(
-                '\'persons\' cannot be None while \'has_custom_users_target\' '
-                'is True '
+                '\'persons\' cannot be falsy while'
+                ' \'has_custom_users_target\' is True '
             )
         else:
             notification.save()
