@@ -62,7 +62,7 @@ def _divide_chunks(endpoints):
 
 # Queue
 @celery_app.task(
-    queue='celery-notifications',
+    queue='celery',
     autoretry_for=(Exception,),
     retry_kwargs={'max_retries': 5}
 )
