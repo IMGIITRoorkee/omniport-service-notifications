@@ -31,14 +31,27 @@ def fcm_push(notification_id, tokens=None):
             click_action=notification.android_onclick_activity
         )
     )
+
+    if app_config.assets is not None:
+        icon_url = os.path.join(
+            settings.STATIC_URL,
+            app_config.base_urls.static,
+            'assets',
+            app_config.assets.logo,
+        )
+    else:
+        icon_url = os.path.join(
+                settings.STATIC_URL,
+                'notifications',
+                settings.DISCOVERY.get_app_configuration(
+                    'notifications'
+                ).base_urls.static,
+                'bell_icon.svg'
+        )
+
     webpush_conf = messaging.WebpushConfig(
         notification=messaging.WebpushNotification(
-            icon=os.path.join(
-                settings.STATIC_URL,
-                app_config.base_urls.static,
-                'assets',
-                app_config.assets.logo,
-            ),
+            icon=icon_url,
             actions=[
                 messaging.WebpushNotificationAction(
                     action=notification.web_onclick_url,
