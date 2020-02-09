@@ -14,7 +14,7 @@ router = routers.SimpleRouter()
 router.register(
     r'user_notifications',
     UserNotificationViewSet,
-    base_name='user_notifications'
+    basename='user_notifications'
 )
 
 urlpatterns = [
