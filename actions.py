@@ -74,7 +74,7 @@ def push_notification(
             notification.save()
             all_endpoints = PushEndpoint.fetch(person)
             UserNotification(
-                person_id=person,
+                person_id=person.id,
                 notification_id=notification.id
             ).push()
             if all_endpoints:
