@@ -1,3 +1,4 @@
+import swapper
 import logging
 
 from notifications.models import Notification
@@ -11,6 +12,7 @@ from notifications.redisdb import (
     UserNotification,
 )
 
+Person = swapper.load_model('kernel', 'Person')
 logger = logging.getLogger('notifications')
 
 
@@ -33,9 +35,9 @@ def push_notification(
     :param android_onclick_activity: Name of android activity to open on clicking the notification
     :param ios_onclick_action: # TODO
     :param is_personalised: Flag for a personalised notification
-    :param person: Person corresponding to the personalised notification
+    :param person: Person (id/instance) corresponding to the personalised notification
     :param has_custom_users_target: Flag for a notification with a custom users target
-    :param persons: Custom users target
+    :param persons: Custom users (person's instance/id) target
     :return: Notification object
     """
 
@@ -71,6 +73,9 @@ def push_notification(
                 '\'person\' cannot be None for a personalised notification'
             )
         else:
+            if isinstance(person, Person):
+                person = person.id
+
             notification.save()
             all_endpoints = PushEndpoint.fetch(person)
             UserNotification(
@@ -99,6 +104,12 @@ def push_notification(
                 'is True '
             )
         else:
+            persons = [
+                person.id if isinstance(person, Person)
+                else person
+                for person in persons
+            ]
+
             notification.save()
             _ = execute_users_set_push(
                 notification_id=notification.id,
