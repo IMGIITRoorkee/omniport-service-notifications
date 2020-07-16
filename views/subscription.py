@@ -37,7 +37,7 @@ class Subscription(APIView):
         """
         try:
             new_subscriptions = request.data['save']
-            new_unsubscription = request.data['delete']
+            new_unsubscription = request.data['drop']
         except KeyError:
             return Response(
                 data={
@@ -50,14 +50,14 @@ class Subscription(APIView):
         for category in new_subscriptions:
             _ = UserSubscription(
                 person=request.person,
-                category=category,
+                category=Category.objects.get(category),
                 action='notifications',
             ).subscribe()
 
         for category in new_unsubscription:
             _ = UserSubscription(
                 person=request.person,
-                category=category,
+                category=Category.objects.get(category),
                 action='notifications',
             ).unsubscribe()
 
