@@ -60,9 +60,11 @@ def _divide_chunks(endpoints):
         yield endpoints[i:i + FCM_PUSH_LIMIT]
 
 
+celery_app.control.add_consumer('notifications', reply=True) # Create separate queue for notifications task
+
 # Queue
 @celery_app.task(
-    queue='celery',
+    queue='notifications',
     autoretry_for=(Exception,),
     retry_kwargs={'max_retries': 5}
 )
