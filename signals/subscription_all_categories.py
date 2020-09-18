@@ -1,28 +1,26 @@
 import swapper
-
 from django.dispatch import receiver
-
-from rest_framework import status
-from rest_framework.response import Response
-
 from django.db.models.signals import (
     post_save
 )
+
+from rest_framework import status
+from rest_framework.response import Response
 
 from categories.models import (
     UserSubscription,
     Category
 )
 
-@receiver(post_save, sender = swapper.get_model_name('kernel', 'Person'))
+Person = swapper.get_model_name('kernel', 'Person')
+@receiver(post_save, sender = Person)
 def subscription_all_categories(sender, instance, **kwargs):
-    
-    """ Database signal receiver for notification subscription to all Categories
+    """ 
+    Database signal receiver for notification subscription to all Categories
     whenever a new Person is created.
-    :param sender:
-    :param instance:
+    :param sender: Person model class
+    :param instance: new Person object created
     :param kwargs:
-    :return:
     """
     
     category_list = Category.objects.all()
