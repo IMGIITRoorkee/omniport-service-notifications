@@ -47,12 +47,21 @@ class Subscription(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        for category in new_subscriptions:
-            _ = UserSubscription(
-                person=request.person,
-                category=Category.objects.get(slug=category),
-                action='notifications',
-            ).subscribe()
+        for category_slug in new_subscriptions:
+            category = Category.objects.get(slug=category_slug)
+            try:
+                UserSubscription.objects.get(
+                    person=request.person,
+                    category=category,
+                    action='notifications')
+            except UserSubscription.DoesNotExist:
+                _ = UserSubscription(
+                    person=request.person,
+                    category=category,
+                    action='notifications',
+                ).subscribe()
+                    
+            
 
         for category in new_unsubscription:
             _ = UserSubscription(
