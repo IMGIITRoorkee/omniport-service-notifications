@@ -6,7 +6,3 @@ from notifications.signals.subscription import (
 from notifications.signals.subscription_all_categories import (
     subscription_all_categories
 )
-
-from notifications.signals.subscription_all_persons import (
-    subscription_all_persons
-)
