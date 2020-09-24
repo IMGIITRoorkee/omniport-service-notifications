@@ -6,6 +6,8 @@ from rest_framework.views import APIView
 from categories.models import UserSubscription, Category
 from categories.serializers import SubscriptionTreeSerializer
 
+from notifications.utils.get_subscription import get_subscription
+
 
 class Subscription(APIView):
     """
@@ -46,29 +48,22 @@ class Subscription(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-        for category_slug in new_subscriptions:
-            category = Category.objects.get(slug=category_slug)
-            try:
-                UserSubscription.objects.get(
-                    person=request.person,
-                    category=category,
-                    action='notifications')
-            except UserSubscription.DoesNotExist:
-                _ = UserSubscription(
-                    person=request.person,
-                    category=category,
-                    action='notifications',
-                ).subscribe()
-                    
-            
-
-        for category in new_unsubscription:
+        subscribe,unsubscribe = get_subscription(new_subscriptions,new_unsubscription,request.person).get_should_subscribe()
+        for category in unsubscribe:
             _ = UserSubscription(
                 person=request.person,
                 category=Category.objects.get(slug=category),
                 action='notifications',
             ).unsubscribe()
+
+        for category_slug in subscribe:
+            category = Category.objects.get(slug=category_slug)
+        
+            _ = UserSubscription(
+                person=request.person,
+                category=Category.objects.get(slug=category_slug),
+                action='notifications',
+            ).subscribe()
 
         return Response(
             data={
