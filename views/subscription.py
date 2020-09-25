@@ -48,7 +48,7 @@ class Subscription(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-        subscribe,unsubscribe = get_subscription(new_subscriptions,new_unsubscription,request.person).get_should_subscribe()
+        subscribe,unsubscribe = get_subscription(new_subscriptions,new_unsubscription,request.person,'notifications').get_should_subscribe()
         for category in unsubscribe:
             _ = UserSubscription(
                 person=request.person,

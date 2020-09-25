@@ -10,11 +10,12 @@ class get_subscription:
     selected = {}
     roots = []
     
-    def __init__(self,save,drop,person):
+    def __init__(self,save,drop,person,action):
             self.save = save
             self.drop = drop
             self.person = person
             self.all = save+drop
+            self.action = action
             self.subscribe = []
             self.unsubscribe = []
             self.roots = []
@@ -70,7 +71,7 @@ class get_subscription:
         for slug in self.all: 
             self.last_subscribed[slug] = False
         #set last subscribed true for already subscribed
-        for subscription in list(UserSubscription.objects.filter(person=self.person)):
+        for subscription in list(UserSubscription.objects.filter(person=self.person,action = self.action)):
             self.last_subscribed[subscription.category.slug] = True
         
         for slug in self.all:
