@@ -1,7 +1,5 @@
 from categories.models import Category,UserSubscription
 
-
-
 class get_subscription:
     should_subscribe = {}
     subscribe = []
@@ -21,7 +19,6 @@ class get_subscription:
             self.roots = []
    
     #nodes to be selected
-
     def select(self):
         for slug in self.save:
             self.selected[slug] = True
@@ -83,8 +80,3 @@ class get_subscription:
                     self.subscribe.append(slug) # if subscribed last time but not this time unsubscribe
         
         return self.subscribe,self.unsubscribe
-
-
-
-    
-
