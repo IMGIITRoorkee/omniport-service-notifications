@@ -5,9 +5,7 @@ from rest_framework.views import APIView
 
 from categories.models import UserSubscription, Category
 from categories.serializers import SubscriptionTreeSerializer
-
 from notifications.utils.get_subscription import get_subscription
-
 
 class Subscription(APIView):
     """
