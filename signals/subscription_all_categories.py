@@ -24,7 +24,6 @@ def subscription_all_categories(sender, instance, **kwargs):
     """
     
     category_list = Category.objects.filter(level=0)
-    category_list = list(category_list)
     
     for category in category_list:        
         _ = UserSubscription(
