@@ -50,16 +50,15 @@ class Subscription(APIView):
         for category in unsubscribe:
             _ = UserSubscription(
                 person=request.person,
-                category=Category.objects.get(slug=category),
+                category=category,
                 action='notifications',
             ).unsubscribe()
 
-        for category_slug in subscribe:
-            category = Category.objects.get(slug=category_slug)
+        for category in subscribe:
         
             _ = UserSubscription(
                 person=request.person,
-                category=Category.objects.get(slug=category_slug),
+                category=category,
                 action='notifications',
             ).subscribe()
 
