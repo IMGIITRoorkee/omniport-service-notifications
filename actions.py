@@ -27,7 +27,7 @@ def push_notification(
         person=None,
         has_custom_users_target=False,
         persons=None,
-        send_only_to_subscribed_targets=False
+        send_only_to_subscribed_users=False
 ):
     """
     Unified method to generate notification object and execute pushing
@@ -40,7 +40,7 @@ def push_notification(
     :param person: Person (id/instance) corresponding to the personalised notification
     :param has_custom_users_target: Flag for a notification with a custom users target
     :param persons: Custom users (person's instance/id) target
-    :param send_only_to_subscribed_targets: Flag for a notification only to be sent to subscribed users
+    :param send_only_to_subscribed_users: Flag for a notification only to be sent to subscribed users
     :return: Notification object
     """
 
@@ -113,7 +113,7 @@ def push_notification(
                 for person in persons
             ]
 
-        if send_only_to_subscribed_targets:
+        if send_only_to_subscribed_users:
             # Get a set of all subscribed people ids
             subscribed_persons = {
                 int(person_id) for person_id in
