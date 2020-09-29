@@ -1,6 +1,7 @@
 import swapper
 import logging
 
+from categories.redisdb import Subscription
 from notifications.models import Notification
 from notifications.tasks import (
     execute_topic_push,
@@ -25,7 +26,8 @@ def push_notification(
         is_personalised=False,
         person=None,
         has_custom_users_target=False,
-        persons=None
+        persons=None,
+        send_only_to_subscribed_targets=False
 ):
     """
     Unified method to generate notification object and execute pushing
@@ -38,6 +40,7 @@ def push_notification(
     :param person: Person (id/instance) corresponding to the personalised notification
     :param has_custom_users_target: Flag for a notification with a custom users target
     :param persons: Custom users (person's instance/id) target
+    :param send_only_to_subscribed_targets: Flag for a notification only to be sent to subscribed users
     :return: Notification object
     """
 
@@ -110,15 +113,28 @@ def push_notification(
                 for person in persons
             ]
 
-            notification.save()
-            _ = execute_users_set_push(
-                notification_id=notification.id,
-                persons=persons
-            )
-            logger.info(
-                f'Mass notification #{notification.id} successfully sent'
-            )
-            return notification
+        if send_only_to_subscribed_targets:
+            # Get a set of all subscribed people ids
+            subscribed_persons = {
+                int(person_id) for person_id in
+                Subscription.fetch_people(
+                    category_slug=category.slug,
+                    action='notifications'
+                )
+            }
+
+            # Grab an intersection of the subscribed people and the complete list
+            persons = list(subscribed_persons.intersection(persons))
+
+        notification.save()
+        _ = execute_users_set_push(
+            notification_id=notification.id,
+            persons=persons
+        )
+        logger.info(
+            f'Mass notification #{notification.id} successfully sent'
+        )
+        return notification
 
     if not (is_personalised and has_custom_users_target):
         notification.save()
