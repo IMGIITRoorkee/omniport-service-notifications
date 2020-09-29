@@ -32,7 +32,7 @@ def fcm_push(notification_id, tokens=None):
         )
     )
 
-    if app_config.assets is not None:
+    if app_config is not None and app_config.assets is not None:
         icon_url = os.path.join(
             settings.STATIC_URL,
             app_config.base_urls.static,
