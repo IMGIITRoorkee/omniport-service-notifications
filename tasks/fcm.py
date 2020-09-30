@@ -54,8 +54,6 @@ def execute_users_set_push(notification_id, persons):
 
 def _divide_chunks(endpoints):
     length = len(endpoints)
-    if length <= FCM_PUSH_LIMIT:
-        yield endpoints
     for i in range(0, length, FCM_PUSH_LIMIT):
         yield endpoints[i:i + FCM_PUSH_LIMIT]
 
