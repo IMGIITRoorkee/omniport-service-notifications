@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 
 from categories.models import UserSubscription, Category
 from categories.serializers import SubscriptionTreeSerializer
-
+from categories.utils.get_subscription import GetSubscription
 
 class Subscription(APIView):
     """
@@ -37,7 +37,7 @@ class Subscription(APIView):
         """
         try:
             new_subscriptions = request.data['save']
-            new_unsubscription = request.data['delete']
+            new_unsubscription = request.data['drop']
         except KeyError:
             return Response(
                 data={
@@ -46,20 +46,27 @@ class Subscription(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
+        subscribe,unsubscribe = GetSubscription(
+                                new_subscriptions,
+                                new_unsubscription,
+                                request.person,
+                                'notifications'
+                            ).get_should_subscribe()
 
-        for category in new_subscriptions:
-            _ = UserSubscription(
-                person=request.person,
-                category=category,
-                action='notifications',
-            ).subscribe()
-
-        for category in new_unsubscription:
+        for category in unsubscribe:
             _ = UserSubscription(
                 person=request.person,
                 category=category,
                 action='notifications',
             ).unsubscribe()
+
+        for category in subscribe:
+        
+            _ = UserSubscription(
+                person=request.person,
+                category=category,
+                action='notifications',
+            ).subscribe()
 
         return Response(
             data={
