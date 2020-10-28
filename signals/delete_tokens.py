@@ -23,9 +23,8 @@ def delete_tokens(sender, instance, **kwargs):
     # Delete the endpoint using the client identifier when the client
     # is logged out of session
     client_identifier = instance.session_key
-
     res = PushEndpoint.delete(
-        person_id=instance.user.id,
+        person_id=instance.user.person.id,
         session_id=client_identifier
     )
     print(f'signal (pre_delete) {instance}')
