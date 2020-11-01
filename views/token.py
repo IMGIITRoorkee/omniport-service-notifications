@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from notifications.redisdb import PushEndpoint
+from notifications.redisdb import GetTokenType
 
 
 class FCMToken(APIView):
@@ -27,14 +28,22 @@ class FCMToken(APIView):
             # is not based on session
             if not bool(request.session.session_key):
                 client_identifier = request.data['client_identifier']
+                token_type = 'android'
             else:
                 client_identifier = request.session.session_key
+                token_type = 'web'
 
             res = PushEndpoint(
                 person_id=request.person.id,
                 session_id=client_identifier,
                 endpoint=request.data['token']
             ).save()
+
+            tokens = GetTokenType(
+                person_id = request.person.id,
+                token_type = token_type,
+                endpoint = request.data['token']
+            ).save()                        
         except KeyError:
             return Response(
                 data={
