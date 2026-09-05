@@ -84,9 +84,7 @@ def fcm_push(notification_id, tokens=None):
             _ = messaging.send_multicast(message, dry_run=False)
         else:
             _ = messaging.send(message, dry_run=False)
-    except messaging.ApiCallError as e:
-        return False
-    except ValueError as e:
+    except Exception:
         return False
 
     return True
@@ -102,9 +100,7 @@ def fcm_subscribe(tokens, topic):
 
     try:
         _ = messaging.subscribe_to_topic(tokens, topic)
-    except messaging.ApiCallError as e:
-        return False
-    except ValueError as e:
+    except Exception:
         return False
 
     return True
@@ -121,9 +117,7 @@ def fcm_unsubscribe(tokens, topic):
 
     try:
         _ = messaging.unsubscribe_from_topic(tokens, topic)
-    except messaging.ApiCallError as e:
-        return False
-    except ValueError as e:
+    except Exception:
         return False
 
     return True
