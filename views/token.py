@@ -3,7 +3,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from notifications.redisdb import PushEndpoint
+from notifications.utils.push_endpoints import (
+    register_endpoint,
+    unregister_endpoint
+)
 
 
 class FCMToken(APIView):
@@ -30,11 +33,11 @@ class FCMToken(APIView):
             else:
                 client_identifier = request.session.session_key
 
-            res = PushEndpoint(
+            res = register_endpoint(
                 person_id=request.person.id,
-                session_id=client_identifier,
-                endpoint=request.data['token']
-            ).save()
+                field=client_identifier,
+                token=request.data['token']
+            )
         except KeyError:
             return Response(
                 data={
@@ -66,9 +69,9 @@ class FCMToken(APIView):
             else:
                 client_identifier = request.session.session_key
             
-            res = PushEndpoint.delete(
+            res = unregister_endpoint(
                 person_id=request.person.id,
-                session_id=client_identifier
+                field=client_identifier
             )
         except KeyError:
             return Response(

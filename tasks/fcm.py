@@ -1,8 +1,16 @@
+import logging
+
 from omniport.celery import celery_app
 from categories.redisdb import Subscription
 from notifications.redisdb import PushEndpoint, UserNotification
-from notifications.utils.fcm import fcm_push
+from notifications.utils.fcm import (
+    DEAD_TOKEN_ERRORS,
+    fcm_push,
+    fcm_push_multicast,
+)
 from notifications.constants import FCM_PUSH_LIMIT
+
+logger = logging.getLogger('notifications')
 
 
 def execute_topic_push(notification):
@@ -44,12 +52,70 @@ def execute_users_set_push(notification_id, persons):
         notification_id=notification_id
     )
     for person in persons:
-        endpoints += PushEndpoint.fetch(person)
+        endpoints += endpoints_of(person)
 
     res = list()
     for chunk in _divide_chunks(endpoints):
         res.append(subset_push.delay(notification_id, chunk))
     return all(res)
+
+
+def endpoints_of(person_id):
+    """
+    List the person's endpoints, each with the person and field it is
+    registered under so that it can be deleted if it turns out to be dead
+    :param person_id: Person's db id
+    :return: list of (person id, field, token)
+    """
+
+    return [
+        (person_id, field, token)
+        for field, token in PushEndpoint.fetch_fields(person_id).items()
+    ]
+
+
+def push_to_endpoints(notification_id, endpoints):
+    """
+    Push to the given endpoints and delete the tokens that FCM reports will
+    never receive a push again
+    :param notification_id: Notification id
+    :param endpoints: List of (person id, field, token)
+    :return: success/failure
+    """
+
+    # Tasks queued before endpoints carried their owner hold bare tokens
+    endpoints = [
+        endpoint if isinstance(endpoint, (list, tuple))
+        else (None, None, endpoint)
+        for endpoint in endpoints
+    ]
+    if not endpoints:
+        return True
+
+    response = fcm_push_multicast(
+        notification_id=notification_id,
+        tokens=[token for _, _, token in endpoints],
+    )
+    if response is None:
+        return False
+
+    # Any other error is not the token's fault: an invalid message, for
+    # one, fails every token in the batch
+    for (person_id, field, token), result in zip(
+            endpoints, response.responses
+    ):
+        if (
+            person_id is not None
+            and isinstance(result.exception, DEAD_TOKEN_ERRORS)
+        ):
+            try:
+                PushEndpoint.remove(person_id, field, token)
+            except Exception:
+                logger.exception(
+                    f'Could not delete a dead token of person {person_id}'
+                )
+
+    return True
 
 
 def _divide_chunks(endpoints):
@@ -70,10 +136,10 @@ def subset_push(notification_id, endpoints):
     """
     Batchwise pushing notifications using message-broker
     :param notification_id: Notification id
-    :param endpoints: List of endpoints less than push limit
+    :param endpoints: List of (person id, field, token) less than push limit
     :return: success/failure
     """
-    return fcm_push(
+    return push_to_endpoints(
         notification_id=notification_id,
-        tokens=endpoints,
+        endpoints=endpoints,
     )

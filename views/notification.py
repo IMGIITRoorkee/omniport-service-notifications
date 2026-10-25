@@ -16,8 +16,6 @@ class UserNotificationViewSet(ModelViewSet):
     """
     The view for fetching user notifications
     """
-    _time_threshold = datetime.date.today() - datetime.timedelta(
-        NOTIFICATION_AGE_LIMIT)
 
     serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated, ]
@@ -65,8 +63,12 @@ class UserNotificationViewSet(ModelViewSet):
         for app in available:
             app_filter |= Q(category__slug__startswith=app)
 
+        # Computed per request so that the cutoff moves forward every day
+        time_threshold = datetime.date.today() - datetime.timedelta(
+            NOTIFICATION_AGE_LIMIT)
+
         notifications_list = Notification.objects.filter(
-            datetime_created__gt=self._time_threshold
+            datetime_created__gt=time_threshold
         ).filter(
             id__in=all_notification_ids
         ).filter(app_filter)

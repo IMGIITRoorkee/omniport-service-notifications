@@ -14,6 +14,7 @@ from notifications.utils.fcm import (
     fcm_subscribe,
     fcm_unsubscribe
 )
+from notifications.utils.topics import joins_topic
 
 
 @receiver(post_save, sender=UserSubscription)
@@ -27,7 +28,10 @@ def subscription_handler(sender, instance, **kwargs):
     """
 
     print(f'signal (post_save) {instance}')
-    if instance.action == 'notifications':
+    if (
+        instance.action == 'notifications'
+        and joins_topic(instance.category)
+    ):
         tokens = PushEndpoint.fetch(instance.person.id)
         if tokens:
             fcm_subscribe(tokens=tokens, topic=instance.category.slug)
@@ -44,7 +48,10 @@ def unsubscription_handler(sender, instance, **kwargs):
     """
 
     print(f'signal (pre_delete) {instance}')
-    if instance.action == 'notifications':
+    if (
+        instance.action == 'notifications'
+        and joins_topic(instance.category)
+    ):
         tokens = PushEndpoint.fetch(instance.person.id)
         if tokens:
             fcm_unsubscribe(tokens=tokens, topic=instance.category.slug)

@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -6,6 +8,9 @@ from rest_framework.views import APIView
 from categories.models import UserSubscription, Category
 from categories.serializers import SubscriptionTreeSerializer
 from categories.utils.get_subscription import GetSubscription
+
+logger = logging.getLogger('notifications')
+
 
 class Subscription(APIView):
     """
@@ -24,7 +29,20 @@ class Subscription(APIView):
         """
 
         roots = Category.objects.root_nodes()
-        serializer = SubscriptionTreeSerializer(roots, many=True)
+
+        specific_app = request.query_params.get('app')
+        if specific_app:
+            roots = roots.filter(slug=specific_app)
+
+        # Without the person and action every row reads as unsubscribed
+        serializer = SubscriptionTreeSerializer(
+            roots,
+            many=True,
+            context={
+                'person': request.person,
+                'action': 'notifications',
+            }
+        )
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
@@ -53,20 +71,43 @@ class Subscription(APIView):
                                 'notifications'
                             ).get_should_subscribe()
 
+        failures = list()
+
         for category in unsubscribe:
-            _ = UserSubscription(
+            if not UserSubscription(
                 person=request.person,
                 category=category,
                 action='notifications',
-            ).unsubscribe()
+            ).unsubscribe():
+                failures.append(category.slug)
 
         for category in subscribe:
-        
-            _ = UserSubscription(
+            if not UserSubscription(
                 person=request.person,
                 category=category,
                 action='notifications',
-            ).subscribe()
+            ).subscribe():
+                failures.append(category.slug)
+
+        # Safe for the caller to retry: both calls are idempotent
+        if failures:
+            logger.error(
+                'Failed to update the notification subscriptions of '
+                f'{self.request.person} for the categories {failures}'
+            )
+            return Response(
+                data={
+                    'success': False,
+                    'error': 'Some subscriptions could not be updated',
+                    'failed': failures,
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        logger.info(
+            'Successfully updated the notification subscriptions for '
+            f'{self.request.person}'
+        )
 
         return Response(
             data={

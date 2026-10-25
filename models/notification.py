@@ -40,6 +40,12 @@ class Notification(Model):
     has_custom_users_target = models.BooleanField(
         default=False,
     )
+    data = models.JSONField(
+        verbose_name='Data',
+        help_text='Key value pairs sent to the client along with the push',
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         ordering = ['-datetime_modified']
